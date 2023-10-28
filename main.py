@@ -1,22 +1,55 @@
-class Human:
-    def __init__(self, age, name, height):
-        self.age = age
-        self.name = name
-        self.height = height
-        print('I was born here! My name is', name)
-    def say_hello_to(self, name_to):
-        print('Hello,', name_to)
-    def tell_about_yourself(self):
-        print('Hello, myname is', self.age)
-        print('I am',self.age, 'y o')
-    def happy_birthday(self):
-        print('Today is my biirthday')
-        self.age += 1
-print('ALEX')
-Alex = Human(10, 'Alex', 130)
-print(Alex.age)
-Alex.happy_birthday()
-print(Alex.age)
-print('ANDREW')
-Andrew = Human(15, 'Andrew', 170)
-Andrew.say_hello_to('Saraj')
+import random
+
+import pygame
+pygame.init()
+win = pygame.display.set_mode((1920,1030))
+FPS = 60
+Clock = pygame.time.Clock()
+
+
+
+class Circle():
+    def __init__(self, x, y, rad, color):
+        self.color = color
+        self.win = win
+        self.x = x
+        self.y = y
+        self.rad = rad
+        self.dir = 'right'
+
+
+    def draw(self):
+        pygame.draw.circle(win,self.color, (self.x, self.y), self.rad)
+    def zmey(self):
+        if self.dir == 'right':
+            self.x += 3
+            if self.x >=1920:
+                self.dir = 'left'
+        else:
+            self.x -= 3
+            if self.x <= 0:
+                self.dir = 'right'
+
+
+
+
+
+x = 10
+y = 10
+rad = 306
+
+
+list_circles = []
+for i in range(100):
+    list_circles.append(Circle(i*10, i * 5, 30,random.choices(range(256),k = 3)))
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            exit()
+    win.fill((255,255,255))
+    for i in range(100):
+        list_circles[i].draw()
+        list_circles[i].zmey()
+    pygame.display.update()
+    Clock.tick(FPS)
