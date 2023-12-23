@@ -21,7 +21,7 @@ while True:
     pos = pygame.mouse.get_pos()
 
     radius += flag
-    if radius == 70:
+    if radius == 170:
         flag = -1
     elif radius == 30:
         flag = 1
