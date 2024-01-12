@@ -15,16 +15,17 @@ class Tank:
     def __init__(self, color, gx, gy, dir, key1):
         objects.append(self)
         self.type = 'tank'
+
         self.color = color
         self.rect = pygame.Rect(gx, gy, TILE, TILE)
         self.dir = dir
-        self.moveSpeed = 1
+        self.moveSpeed = 2
         self.hp = 5
 
         self.shotTimer = 0
         self.shotDelay = 60
-        self.BulletSpeed = 5
-        self.BulletDamage = 1
+        self.bulletSpeed = 5
+        self.bulletDamage = 1
 
         self.keyLEFT = key1[0]
         self.keyRIGHT = key1[1]
@@ -47,22 +48,23 @@ class Tank:
             self.dir = 2
 
         if keys[self.keySHOT] and self.shotTimer == 0:
-            dx = DIRS[self.dir][0] * self.BulletSpeed
-            dy = DIRS[self.dir][1] * self.BulletSpeed
-            Bullet(self, self.rect.centerx, self.rect.centery, dx, dy, self.BulletDamage)
+            dx = DIRS[self.dir][0] * self.bulletSpeed
+            dy = DIRS[self.dir][1] * self.bulletSpeed
+            Bullet(self, self.rect.centerx, self.rect.centery, dx, dy, self.bulletDamage)
             self.shotTimer = self.shotDelay
 
         if self.shotTimer > 0: self.shotTimer -= 1
 
     def draw(self):
         pygame.draw.rect(window, self.color, self.rect)
+
         x = self.rect.centerx + DIRS[self.dir][0] * 30
-        y =self.rect.centery + DIRS[self.dir][1] * 30
+        y = self.rect.centery + DIRS[self.dir][1] * 30
         pygame.draw.line(window, 'white', self.rect.center, (x, y), 4)
 
-    def Damage(self):
+    def damage(self, value):
         self.hp -= value
-        if self.hp >= 0:
+        if self.hp <= 0:
             objects.remove(self)
             print(self.color, 'Dead :(')
 
@@ -73,16 +75,16 @@ class Bullet:
         self.gx, self.gy = gx, gy
         self.dx, self.dy = dx, dy
         self.damage = damage
-        self.image = pygame.image.load('New Piskel.png')
+
     def update(self):
         self.gx += self.dx
-        self.gy += self.gy
+        self.gy += self.dy
 
         if self.gx < 0 or self.gx > WIDTH or self.gy < 0 or self.gy > HEIGHT:
             bullets.remove(self)
         else:
             for obj in objects:
-                if obj != self.parent and obj.rect.collidepoit(self.gx, self.gy):
+                if obj != self.parent and obj.rect.collidepoint(self.gx, self.gy):
                     obj.damage(self.damage)
                     bullets.remove(self)
                     break
@@ -101,10 +103,11 @@ while 1:
             exit()
 
     keys = pygame.key.get_pressed()
-
+    for bullet in bullets: bullet.update()
     for obj in objects: obj.update()
 
     window.fill('black')
+    for bullet in bullets: bullet.draw()
     for obj in objects: obj.draw()
 
     pygame.display.update()
