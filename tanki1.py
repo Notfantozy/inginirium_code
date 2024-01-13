@@ -1,6 +1,6 @@
 import pygame
 pygame.init()
-
+from random import randint
 
 WIDTH, HEIGHT = 800, 600
 FPS = 60
@@ -15,16 +15,17 @@ class Tank:
     def __init__(self, color, gx, gy, dir, key1):
         objects.append(self)
         self.type = 'tank'
+
         self.color = color
         self.rect = pygame.Rect(gx, gy, TILE, TILE)
         self.dir = dir
-        self.moveSpeed = 1
+        self.moveSpeed = 2
         self.hp = 5
 
         self.shotTimer = 0
         self.shotDelay = 60
-        self.BulletSpeed = 5
-        self.BulletDamage = 1
+        self.bulletSpeed = 5
+        self.bulletDamage = 1
 
         self.keyLEFT = key1[0]
         self.keyRIGHT = key1[1]
@@ -33,6 +34,7 @@ class Tank:
         self.keySHOT = key1[4]
 
     def update(self):
+        oldX, oldY = self.rect.topleft
         if keys[self.keyLEFT]:
             self.rect.x -= self.moveSpeed
             self.dir = 3
@@ -46,23 +48,28 @@ class Tank:
             self.rect.y += self.moveSpeed
             self.dir = 2
 
+        for obj in objects:
+            if obj != self and self.rect.collidepoint(obj.rect.left, obj.rect.top):
+                self.rect.topleft = oldX, oldY
+
         if keys[self.keySHOT] and self.shotTimer == 0:
-            dx = DIRS[self.dir][0] * self.BulletSpeed
-            dy = DIRS[self.dir][1] * self.BulletSpeed
-            Bullet(self, self.rect.centerx, self.rect.centery, dx, dy, self.BulletDamage)
+            dx = DIRS[self.dir][0] * self.bulletSpeed
+            dy = DIRS[self.dir][1] * self.bulletSpeed
+            Bullet(self, self.rect.centerx, self.rect.centery, dx, dy, self.bulletDamage)
             self.shotTimer = self.shotDelay
 
         if self.shotTimer > 0: self.shotTimer -= 1
 
     def draw(self):
         pygame.draw.rect(window, self.color, self.rect)
+
         x = self.rect.centerx + DIRS[self.dir][0] * 30
-        y =self.rect.centery + DIRS[self.dir][1] * 30
+        y = self.rect.centery + DIRS[self.dir][1] * 30
         pygame.draw.line(window, 'white', self.rect.center, (x, y), 4)
 
-    def Damage(self):
+    def damage(self, value):
         self.hp -= value
-        if self.hp >= 0:
+        if self.hp <= 0:
             objects.remove(self)
             print(self.color, 'Dead :(')
 
@@ -73,26 +80,61 @@ class Bullet:
         self.gx, self.gy = gx, gy
         self.dx, self.dy = dx, dy
         self.damage = damage
-        self.image = pygame.image.load('New Piskel.png')
+
     def update(self):
         self.gx += self.dx
-        self.gy += self.gy
+        self.gy += self.dy
 
         if self.gx < 0 or self.gx > WIDTH or self.gy < 0 or self.gy > HEIGHT:
             bullets.remove(self)
         else:
             for obj in objects:
-                if obj != self.parent and obj.rect.collidepoit(self.gx, self.gy):
+                if obj != self.parent and obj.rect.collidepoint(self.gx, self.gy):
                     obj.damage(self.damage)
                     bullets.remove(self)
                     break
     def draw(self):
         pygame.draw.circle(window, 'yellow', (self.gx, self.gy), 2)
 
+
+class Block:
+    def __init__(self, gx, gy, size):
+        objects.append(self)
+        self.type = 'block'
+
+        self.rect = pygame.Rect(gx, gy, size, size)
+        self.hp = 1
+
+    def update(self):
+        pass
+
+    def draw(self):
+        pygame.draw.rect(window, 'red', self.rect)
+        pygame.draw.rect(window, 'gray', self.rect, 2)
+
+    def damage(self, value):
+        pass
+
+
+
 bullets = []
 objects = []
 Tank('blue', 100, 275 , 0, (pygame.K_a, pygame.K_d, pygame.K_w, pygame.K_s, pygame.K_LSHIFT))
 Tank('green', 700, 275 , 0, (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN, pygame.K_RCTRL))
+
+
+for build in range(50):
+    while True:
+        x = randint(0, WIDTH // TILE -2) * TILE
+        y = randint(0, HEIGHT // TILE - 2) * TILE
+        rect = pygame.Rect(x, y, TILE, TILE)
+        fin = False
+        for obj in objects:
+            if rect.collidepoint(obj.rect.left, obj.rect.top): fin = True
+
+        if not fin: break
+
+    Block(x, y, TILE)
 
 while 1:
     for event in pygame.event.get():
@@ -101,10 +143,11 @@ while 1:
             exit()
 
     keys = pygame.key.get_pressed()
-
+    for bullet in bullets: bullet.update()
     for obj in objects: obj.update()
 
     window.fill('black')
+    for bullet in bullets: bullet.draw()
     for obj in objects: obj.draw()
 
     pygame.display.update()
