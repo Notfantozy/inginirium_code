@@ -1,7 +1,10 @@
 
 import pygame
 from random import randint
+<<<<<<< HEAD
 import sqlite3
+=======
+>>>>>>> c466e5b5ec81f51e41b86efaaa08c60cebdfd51d
 pygame.init()
 
 WIDTH, HEIGHT = 800, 600
@@ -24,6 +27,7 @@ imgBangs = [
 
 DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]]
 
+<<<<<<< HEAD
 def create_table(wins):
     que_create = '''
             CREATE TABLE IF NOT EXISTS ''' + name + '''(
@@ -32,6 +36,8 @@ def create_table(wins):
                 score TEXT
             )
         '''
+=======
+>>>>>>> c466e5b5ec81f51e41b86efaaa08c60cebdfd51d
 class UI:
     def __init__(self):
         pass
